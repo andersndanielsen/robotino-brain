@@ -361,6 +361,7 @@ bool TcpSocket::isConnected()
  */
 bool TcpSocket::close()
 {
+	_isConnected = false;
 	debug("Closing socket(s)");
 	if (isServer && _isConnected) ::close(connectionFD);
 	if (_isConnected && ::close(socketFD)) return true;
