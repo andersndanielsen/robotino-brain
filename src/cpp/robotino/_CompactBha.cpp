@@ -156,13 +156,13 @@ _CompactBha::analyze()
 		if ( diff > CBHA_ARM_ACTIVITY_THRESHOLD )
 		{
 			armActivity = true;
-			std::cout
-				<< "CompactBha: Arm activity threshold! - Diffs"
-			    << " ("	<< i << ": "
-				<< readPressures[ i ] << " - "
-				<< targetPressures[ i ] << " = "
-				<< diff << " )"
-				<< std::endl;
+//			std::cout
+//				<< "CompactBha: Arm activity threshold! - Diffs"
+//			    << " ("	<< i << ": "
+//				<< readPressures[ i ] << " - "
+//				<< targetPressures[ i ] << " = "
+//				<< diff << " )"
+//				<< std::endl;
 			break;
 		}
 		else
@@ -172,13 +172,13 @@ _CompactBha::analyze()
 			if ( fabs( pressureDeltaSum ) > CBHA_ARM_ACTIVITY_DELTAS_THRESHOLD )
 			{
 				armActivity = true;
-				std::cout
-					<< "CompactBha: Arm activity threshold! - Deltas"
-					<< " ("	<< i << ": "
-					<< pressureDeltaSum
-					<< " > " << CBHA_ARM_ACTIVITY_DELTAS_THRESHOLD
-					<< " )"
-					<< std::endl;
+//				std::cout
+//					<< "CompactBha: Arm activity threshold! - Deltas"
+//					<< " ("	<< i << ": "
+//					<< pressureDeltaSum
+//					<< " > " << CBHA_ARM_ACTIVITY_DELTAS_THRESHOLD
+//					<< " )"
+//					<< std::endl;
 				break;
 			}
 		}
@@ -318,27 +318,6 @@ _CompactBha::release()
 	this->setGripperValve2( false );	// Open outlet-valve
 	this->gripDoneTime = 0;
 	this->releaseDoneTime = this->brain()->msecsElapsed() + CBHA_RELEASE_TIME_MSECS;
-}
-
-bool
-_CompactBha::contact()
-{
-/*	this->touchDetected = false;
-	// If not already detected, check if touched (for calibration)
-	for ( unsigned int i = 0; i < CBHA_STRINGPOTS_COUNT / 2 ; i++ )
-	{
-		double motionSum = fabs( this->potDeltas[ i ].front() + this->potDeltas[ i + 3 ].front() );
-		if ( motionSum > CBHA_TOUCHED_THRESHOLD )
-		{
-			std::cout
-			<< "CompactBha: Touched!"
-			<< " ( pots " << i << '+' << i+3 << " = " << motionSum << " )"
-			<< std::endl;
-
-			this->touchDetected = true;
-		}
-	}	*/
-	return this->touchDetected;	
 }
 
 void

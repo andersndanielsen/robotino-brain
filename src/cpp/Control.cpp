@@ -58,7 +58,7 @@ class Control
 			input = "",
 			command = "";
 
-		unsigned int
+		size_t
 			separator = 0;
 
 		sleep( 1 );
@@ -72,12 +72,6 @@ class Control
 
 			separator = input.find_first_of( " " );
 
-/*			if ( separator == std::string::npos )
-			{
-				this->printInstructions();
-				continue;
-			}
-*/
 			this->_stop = true;
 			if ( this->tWorker.joinable() )
 				this->tWorker.join();
@@ -85,11 +79,9 @@ class Control
 
 			command = input.substr( 0, separator );
 
-			separator += 1;
-
 			if ( command == "goto" )
 			{
-				std::cerr << "Going to " << input.substr( separator ) << std::endl;
+				std::cerr << "Going to " << input.substr( ++separator ) << std::endl;
 				this->goTo( input.substr( separator ) );
 			}
 			else if ( command == "stop" )
@@ -104,13 +96,28 @@ class Control
 			}
 			else if ( command == "pointat" )
 			{
-				std::cerr << "Pointing at " << input.substr( separator ) << std::endl;
+				std::cerr << "Pointing at " << input.substr( ++separator ) << std::endl;
 				this->pointAt( input.substr( separator ) );
 			}
 			else if ( command == "stoppointing" )
 			{
 				this->pBrain->drive()->stopPointing();
 				std::cerr << "Pointing stopped" << std::endl;
+			}
+
+			else if ( command == "speed" )
+			{
+				float s[] = { 0.0, 0.0, 0.0 };
+
+				for ( int i = 0; i < 3; i++ )
+				{
+					if ( separator == input.npos ) break;
+					size_t start = ++separator;
+					separator = input.find( ' ', start );
+					s[i] = atof( input.substr( start, separator).c_str() );
+				}
+
+				this->pBrain->drive()->setVelocity( s[0], s[1], s[2] );
 			}
 
 			else if ( command == "resetodometry" )
@@ -278,6 +285,7 @@ class Control
 			<< "go\tI will continue, if I was previously stopped\n"
 			<< "pointat [coordinate]\tI will turn myself to point at the given coordinate. I will hovever not do this until I am close enough to my destination.\n"
 			<< "stoppointing\tI will not point any more\n"
+			<< "speed [x< y< omega>>]\tSet Robotino's OmniDrive to the given speeds\n"
 			<< "resetodometry\tSets all odometry values to 0. Also resets destination and stops any pointing.\n"
 
 			<< "\nArm:\n"
@@ -494,7 +502,7 @@ class Control
 				} 
 				else
 				{
-					this->pBrain->drive()->phoneDrive(x,y,z);	
+					this->pBrain->drive()->setVelocity(x,y,z);	
 				}
 			}	
 							
