@@ -174,6 +174,12 @@ _OmniDrive::go()
 	this->stop = false;
 }
 
+void
+_OmniDrive::phoneDrive(float& x, float& y, float& z)
+{
+	this->setVelocity(x, y, z);
+}
+
 
 void
 _OmniDrive::travelTowards( Vector destinationVector )

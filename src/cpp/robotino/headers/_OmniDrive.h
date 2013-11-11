@@ -205,7 +205,15 @@ class _OmniDrive : public Axon, public rec::robotino::api2::OmniDrive
 	 * Releases a stop-command by setting the @c stop parameter to false.
 	 */
 	void go();
-	
+
+	/**
+	* Make Robotino drive by signals from phone.
+	*
+	* @param	x	Velocity in x-direction
+	* @param	y	Velocity in y-direction
+	* @param	z	Velocity in z-direction
+	*/
+	void phoneDrive(float& x, float& y, float& z);	
 
  private:
 	float

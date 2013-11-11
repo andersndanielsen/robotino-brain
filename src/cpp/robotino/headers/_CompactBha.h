@@ -151,6 +151,12 @@ class _CompactBha : public rec::robotino::api2::CompactBHA, public Axon
 	 * Initiates a release action, the gripper is opened.
 	 */
 	void release();
+	
+	/**
+	* @return	Boolean state of the touchDetected parameter, indicating if
+	* the arm has touched anything.
+	*/
+	bool contact();
 
 	/**
 	 * Rotate the gripper to a horisontal position.

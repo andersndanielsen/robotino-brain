@@ -2,6 +2,7 @@
 #include "robotino/headers/_OmniDrive.h"
 #include "robotino/headers/_Odometry.h"
 #include "robotino/headers/_CompactBha.h"
+#include "robotino/headers/_Bumper.h"
 
 #include "geometry/All.h"
 
@@ -16,6 +17,8 @@
 #include <vector>
 #include <stdexcept>
 #include <thread>
+#include "tcp/TcpSocket.h"
+#include <sstream>
 
 
 /// The maximum height of a coordinate from Kinect that will be considered for fetching
@@ -69,12 +72,12 @@ class Control
 
 			separator = input.find_first_of( " " );
 
-			if ( separator == std::string::npos )
+/*			if ( separator == std::string::npos )
 			{
 				this->printInstructions();
 				continue;
 			}
-
+*/
 			this->_stop = true;
 			if ( this->tWorker.joinable() )
 				this->tWorker.join();
@@ -203,6 +206,10 @@ class Control
 			{
 				std::cerr << "Pointing to Kinect position" << std::endl;
 				this->tWorker = std::thread( & Control::turnToKinectPos, this );
+			}
+			else if ( command == "phone" )
+			{
+				this->driveWithPhone();
 			}
 
 			else if ( command == "brainstop" )
@@ -427,6 +434,76 @@ class Control
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	* Sets up a TcpSocket that a phone can connect to. This method reads x-, y- and z-values from phone
+	* and sets Robotino's velocity in these directions. If Robotino bumbs into something, this method
+	* will send signal to connected phone.
+	*/
+	void driveWithPhone()
+	{ 
+		_Bumper* bumper = new _Bumper(this->pBrain);
+		_CompactBha* arm = new _CompactBha(this->pBrain);	
+		this->pBrain->stop();  //Stop Brain from having control over Robotino
+		char port[] = "11400";
+		std::string connectedMessage = "connected\n";
+		TcpSocket socket(port);
+
+		std::cout << "Waiting for phone..." << std::endl;
+		if(socket.accept())
+		{
+			std::cout << "Phone connected" << std::endl;
+			socket.write(connectedMessage);
+		}
+
+		while(socket.isConnected())
+		{
+			std::string input;
+			std::string bumperMessage;
+
+			while(socket.read(input))
+			{
+				std::stringstream ss(input);
+				std::vector<std::string> splitdata;
+				std::string item;
+				bumperMessage = "H\n";
+    				while (std::getline(ss, item, ':')) 
+				{
+        				splitdata.push_back(item);
+    				}
+
+				float x = ::atof(splitdata[0].c_str());
+				float y = ::atof(splitdata[1].c_str());
+				float z = ::atof(splitdata[2].c_str());
+		
+				this->pBrain->processEvents();				
+				arm->analyze();
+	
+				if(x==999)
+				{
+					socket.close(); //Android sends x==999 when closing Socket in onPause()
+					break;
+				}
+				else if(bumper->contact() || arm->contact())
+				{
+					std::cout << "Bumper-bumper" << std::endl;
+					socket.write(bumperMessage);
+					socket.close();
+					break;
+				} 
+				else
+				{
+					this->pBrain->drive()->phoneDrive(x,y,z);	
+				}
+			}	
+							
+		}
+		if(socket.isConnected() == false)
+		{
+			std::cout << "Phone disconnected" << std::endl;
+			this->pBrain->start();
+		}
 	}
 
 	/**

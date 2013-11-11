@@ -320,6 +320,27 @@ _CompactBha::release()
 	this->releaseDoneTime = this->brain()->msecsElapsed() + CBHA_RELEASE_TIME_MSECS;
 }
 
+bool
+_CompactBha::contact()
+{
+/*	this->touchDetected = false;
+	// If not already detected, check if touched (for calibration)
+	for ( unsigned int i = 0; i < CBHA_STRINGPOTS_COUNT / 2 ; i++ )
+	{
+		double motionSum = fabs( this->potDeltas[ i ].front() + this->potDeltas[ i + 3 ].front() );
+		if ( motionSum > CBHA_TOUCHED_THRESHOLD )
+		{
+			std::cout
+			<< "CompactBha: Touched!"
+			<< " ( pots " << i << '+' << i+3 << " = " << motionSum << " )"
+			<< std::endl;
+
+			this->touchDetected = true;
+		}
+	}	*/
+	return this->touchDetected;	
+}
+
 void
 _CompactBha::rotateHorisontal()
 {
