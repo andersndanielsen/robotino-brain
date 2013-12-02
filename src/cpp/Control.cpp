@@ -452,8 +452,6 @@ class Control
 	void driveWithPhone()
 	{ 
 		_Bumper* bumper = new _Bumper(this->pBrain);
-		_CompactBha* arm = new _CompactBha(this->pBrain);	
-		this->pBrain->stop();  //Stop Brain from having control over Robotino
 		char port[] = "11400";
 		std::string connectedMessage = "connected\n";
 		TcpSocket socket(port);
@@ -469,13 +467,12 @@ class Control
 		{
 			std::string input;
 			std::string bumperMessage;
-
 			while(socket.read(input))
 			{
 				std::stringstream ss(input);
 				std::vector<std::string> splitdata;
 				std::string item;
-				bumperMessage = "H\n";
+				bumperMessage = "bumper\n";
     				while (std::getline(ss, item, ':')) 
 				{
         				splitdata.push_back(item);
@@ -484,24 +481,24 @@ class Control
 				float x = ::atof(splitdata[0].c_str());
 				float y = ::atof(splitdata[1].c_str());
 				float z = ::atof(splitdata[2].c_str());
-		
-				this->pBrain->processEvents();				
-				arm->analyze();
-	
+			
 				if(x==999)
 				{
 					socket.close(); //Android sends x==999 when closing Socket in onPause()
 					break;
 				}
-				else if(bumper->contact() || arm->contact())
+				else if(bumper->contact())
 				{
-					std::cout << "Bumper-bumper" << std::endl;
+					std::cout << "Robotino crashed" << std::endl;
 					socket.write(bumperMessage);
-					socket.close();
-					break;
+			//		sleep(10);	//Wait 10sec before restarting so bumpersignals have stopped
 				} 
 				else
 				{
+					if(this->pBrain->drive()->stopIsSet())
+					{
+						this->pBrain->drive()->go();				
+					}
 					this->pBrain->drive()->setVelocity(x,y,z);	
 				}
 			}	
@@ -510,7 +507,6 @@ class Control
 		if(socket.isConnected() == false)
 		{
 			std::cout << "Phone disconnected" << std::endl;
-			this->pBrain->start();
 		}
 	}
 
