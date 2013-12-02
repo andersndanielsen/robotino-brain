@@ -491,7 +491,6 @@ class Control
 				{
 					std::cout << "Robotino crashed" << std::endl;
 					socket.write(bumperMessage);
-			//		sleep(10);	//Wait 10sec before restarting so bumpersignals have stopped
 				} 
 				else
 				{
